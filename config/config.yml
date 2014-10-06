@@ -1,0 +1,25 @@
+default: &default
+  runner:
+    instances: 4
+    input_queue: "svp_tariff"
+    output_queue: "svp_bk"
+  database:
+    adapter: postgresql
+    encoding: utf8
+
+development:
+  <<: *default
+
+  database:
+    host: localhost
+
+    port: 5432
+    database: svpdb1
+    username: test_usr_dev1
+    password: test_usr_dev1
+
+test:
+  <<: *default
+
+production:
+  <<: *default
