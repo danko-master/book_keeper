@@ -1,24 +1,39 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
 
-# Run: export APP_ENV=development && ruby ./runner.rb
-# Run: export APP_ENV=test && ruby ./runner.rb
-# Run: export APP_ENV=production && ruby ./runner.rb
+## Достаточно запуска только sidekiq
+# Run: export APP_ENV=development && bundle exec sidekiq -C ./config/sidekiq.yml -r ./runner.rb
+
+
 
 if ENV['APP_ENV']
   # require 'pry'
-  require 'logger'
-
+  
   require_relative 'config/config'
   $config = Configuration.load_config
 
-  require 'active_record'
+  require 'logger'
   current_logger = Logger.new("#{File.dirname(__FILE__)}/log/bk_#{ENV['APP_ENV']}.log")
   current_logger.info "Started"
-
-  p $config
+  
+  require_relative 'lib/workers'
+  require_relative 'lib/db'
+  
+  require 'active_record'
+  ActiveRecord::Base.establish_connection(
+        :adapter  => $config['database']['adapter'],
+        :database => $config['database']['database'],
+        :username => $config['database']['username'],
+        :password => $config['database']['password'],
+        :host     => $config['database']['host'])
 
   
+  require 'sidekiq' 
+  instances = $config['runner']['instances'].to_i
+  while instances > 0
+    BkWorkers::DebitKredit.perform_async(instances)
+    instances = instances - 1
+  end
 else
   puts 'Error: not found "APP_ENV"!'
 end
