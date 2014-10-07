@@ -7,15 +7,20 @@ module BkWorkers
     sidekiq_options queue: :bk
 
     def perform(num_inst)
-      #loop do
-        @current_logger = Logger.new("#{File.dirname(__FILE__)}/../../log/sidekiq_#{ENV['APP_ENV']}_inst_#{num_inst}.log")
-        @current_logger.info { "NOTIFICATIONS: Started" }
-        @bunny = Bunny.new
-        @bunny.start
-        @ch   = @bunny.create_channel
-        run
-        @bunny.close
-      #end
+      @bunny = Bunny.new
+      @flag = true
+      loop do
+        if @flag == true
+          @flag = false
+          @current_logger = Logger.new("#{File.dirname(__FILE__)}/../../log/sidekiq_#{ENV['APP_ENV']}_inst_#{num_inst}.log")
+          @current_logger.info { "NOTIFICATIONS: Started" }
+          @bunny.start
+          @ch   = @bunny.create_channel
+          run
+          @bunny.close
+          @flag = true
+        end
+      end
     end
 
     def run     
@@ -38,6 +43,13 @@ module BkWorkers
 
           send_tdr_data_to_rabbit(tdr, alpha)
         end
+
+        delivery_tag = tdr_data['delivery_tag']
+        # отправка ack в канал
+        @current_logger.info p "Отправка ack в RabbitMQ ::: delivery_tag: #{delivery_tag}"
+        @ch.ack(delivery_tag)
+
+        @current_logger.info p "Обработан tdr #{tdr} ::: debit-kredit #{alpha}"  
       end
     end
 
