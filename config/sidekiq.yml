@@ -1,3 +1,4 @@
 ---
+:concurrency: 1
 :queues:
-  - [bk, 5]
+  - [bk, 1]
