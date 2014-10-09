@@ -9,7 +9,10 @@ module BkWorkers
     def perform(num_inst)
       @experiment_logger = []
 
-      @bunny = Bunny.new
+      @bunny = Bunny.new(host: $config['rabbit']['host'], 
+        port: $config['rabbit']['port'], 
+        user: $config['rabbit']['user'], 
+        password: $config['rabbit']['password'])
       @current_logger = Logger.new("#{File.dirname(__FILE__)}/../../log/sidekiq_#{ENV['APP_ENV']}_inst_#{num_inst}.log")
       @current_logger.info "NOTIFICATIONS: Started"      
       begin
@@ -41,9 +44,11 @@ module BkWorkers
           @current_logger.info p "Новый tdr #{tdr}"
           p debit = tdr["sum"].to_f
 
-          company = Db::Company.find_by_id(tdr["customer_id"])
+          # company = Db::Company.find_by_id(tdr["customer_id"])
+          company = eval($redis.get("svp:company:#{tdr["customer_id"]}"))
+          p "company #{company}"
           if company.present?
-            p kredit = company.balance.to_f
+            p kredit = company['balance'].to_f
             
             alpha = debit - kredit
             if alpha > -100
@@ -66,7 +71,7 @@ module BkWorkers
 
         time2 = Time.now
         @experiment_logger << (time2 - time1)
-        if @experiment_logger.size >= 9900
+        if @experiment_logger.size >= 990
           m = @experiment_logger
           @current_logger.info p "Среднее время выполнения"
           p (m.inject(0){ |sum,el| sum + el }.to_f)/ m.size
