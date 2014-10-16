@@ -29,7 +29,7 @@ module BkWorkers
 
     def run     
       @current_logger.info p "Выполняем run, ждем tdr."  
-      q    = @ch.queue($config['runner']['input_queue']) 
+      q    = @ch.queue($config['runner']['input_queue'], :durable => true) 
       q.subscribe(:block => true, :manual_ack => true) do |delivery_info, properties, body|
         time1 = Time.now
 
@@ -53,12 +53,14 @@ module BkWorkers
             alpha = debit - kredit
             if alpha > -100
               p "превышен порог"
-              p "ставим флаг"
+              p "ставим флаг"              
+              $redis_alarm.set("#{$config['redis_alarm']['db']}:#{tdr_data['imei']}", 1)
             else
               p "все нормально"
+              $redis_alarm.set("#{$config['redis_alarm']['db']}:#{tdr_data['imei']}", 0)
             end
 
-            send_tdr_data_to_rabbit(tdr, alpha)
+            send_tdr_data_to_rabbit(tdr, debit)
           end
 
           delivery_tag = tdr_data['delivery_tag']
@@ -96,24 +98,24 @@ module BkWorkers
     #   tdr_data
     # end
 
-    def send_tdr_data_to_rabbit(tdr, alpha)
-      @current_logger.info p "Отправка tdr в RabbitMQ #{tdr} ::: debit-kredit: #{alpha}"
+    def send_tdr_data_to_rabbit(tdr, debit)
+      @current_logger.info p "Отправка tdr в RabbitMQ #{tdr} ::: debit: #{debit}"
       q    = @ch.queue($config['runner']['output_queue'])
 
       tdr_bson = BSON::Document.new(
         # id машины
         imei: tdr['imei'], 
-        road_id: tdr['road_id'], 
-        lat0: tdr['lat0'], 
-        lon0: tdr['lon0'], 
-        time0: tdr['time0'], 
-        lat1: tdr['lat1'], 
-        lon1: tdr['lon1'], 
-        time1: tdr['time1'], 
-        path: tdr['path'],
-        sum: tdr['sum'],
-        customer_id: ['customer_id'],
-        debit_kredit: alpha
+        # road_id: tdr['road_id'], 
+        # lat0: tdr['lat0'], 
+        # lon0: tdr['lon0'], 
+        # time0: tdr['time0'], 
+        # lat1: tdr['lat1'], 
+        # lon1: tdr['lon1'], 
+        # time1: tdr['time1'], 
+        # path: tdr['path'],
+        # sum: tdr['sum'],
+        # customer_id: ['customer_id'],
+        debit: debit
       )
 
       @ch.default_exchange.publish(tdr_bson.to_s, :routing_key => q.name)

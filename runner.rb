@@ -3,6 +3,7 @@
 
 ## Достаточно запуска только sidekiq
 # Run: export APP_ENV=development && bundle exec sidekiq -C ./config/sidekiq.yml -r ./runner.rb
+# Run: export APP_ENV=production && bundle exec sidekiq -C ./config/sidekiq.yml -r ./runner.rb
 
 
 
@@ -30,6 +31,7 @@ if ENV['APP_ENV']
   
   require 'redis'
   $redis = Redis.new
+  $redis_alarm = Redis.new(host: $config['redis_alarm']['host'], port: $config['redis_alarm']['port'])
   
   require 'sidekiq' 
   instances = 0
