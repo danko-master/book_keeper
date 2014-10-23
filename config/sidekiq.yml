@@ -1,5 +1,5 @@
 ---
-:concurrency: 5
+:concurrency: 2
 :queues:
   - [bk_credit, 1]
   - [bk_debit, 1]
