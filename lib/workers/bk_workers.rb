@@ -65,15 +65,17 @@ module BkWorkers
                 @current_logger.info p "#{$config['redis_alarm']['prefix']}:#{tdr['company_account_id']} превышен порог"
                 @current_logger.info p "#{$config['redis_alarm']['prefix']}:#{tdr['company_account_id']} ставим флаг 1" 
                 $redis_alarm.set("#{$config['redis_alarm']['prefix']}:#{tdr['company_account_id']}", 1)
+                flag = 1
               else
                 @current_logger.info p "#{$config['redis_alarm']['prefix']}:#{tdr['company_account_id']} все нормально"
                 @current_logger.info p "#{$config['redis_alarm']['prefix']}:#{tdr['company_account_id']} ставим флаг 0"
                 $redis_alarm.set("#{$config['redis_alarm']['prefix']}:#{tdr['company_account_id']}", 0)
+                flag = 0
               end
 
               company_values = company_account
               company_values['credit'] = credit
-              RedisHelper.update_company_account(company_account_id, company_values)
+              RedisHelper.update_company_account(company_account_id, company_values, flag)
 
               send_tdr_data_to_rabbit(tdr, credit, company_account_id, obd['id'])
             end
@@ -180,16 +182,18 @@ module BkWorkers
               @current_logger.info p "#{$config['redis_alarm']['prefix']}:#{tdr['company_account_id']} ставим флаг 1" 
               @current_logger.info p "#{$config['redis_alarm']['prefix']}:#{tdr['company_account_id']}"
               $redis_alarm.set("#{$config['redis_alarm']['prefix']}:#{tdr['company_account_id']}", 1)
+              flag = 1
             else
               @current_logger.info p "#{$config['redis_alarm']['prefix']}:#{tdr['company_account_id']} все нормально"
               @current_logger.info p "#{$config['redis_alarm']['prefix']}:#{tdr['company_account_id']} ставим флаг 0"
               @current_logger.info p "#{$config['redis_alarm']['prefix']}:#{tdr['company_account_id']}"
               $redis_alarm.set("#{$config['redis_alarm']['prefix']}:#{tdr['company_account_id']}", 0)
+              flag = 0
             end
 
             company_values = company_account
             company_values['debit'] = debit
-            RedisHelper.update_company_account(company_account_id, company_values)
+            RedisHelper.update_company_account(company_account_id, company_values, flag)
 
             send_tdr_data_to_rabbit(tdr, debit, company_account_id)
           end
@@ -248,7 +252,7 @@ module BkWorkers
       result
     end
 
-    def self.update_company_account(company_account_id, company_values)
+    def self.update_company_account(company_account_id, company_values, flag)
       p "update_company_account"
       p "company_account_id #{company_account_id}"
       p "company_values #{company_values}"
@@ -260,6 +264,8 @@ module BkWorkers
       p ca = Db::CompanyAccount.find_by_id(company_account_id)
       p ca.debit = company_values['debit']
       p ca.credit = company_values['credit']
+      p "ca flag #{flag}"
+      p ca.balance = flag
       ca.save
     end
   end
