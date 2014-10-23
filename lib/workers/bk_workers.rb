@@ -41,7 +41,7 @@ module BkWorkers
           if tdr_data.present?
             tdr = JSON.parse(tdr_data['tdr'])
             @current_logger.info p "Новый tdr из #{tdr}"
-            p credit_rabbit = tdr["sum"].to_f
+            p credit_rabbit = tdr['sum'].to_f
 
             obd = RedisHelper.on_board_device(tdr['imei'])
             p "obd #{obd}"
@@ -57,6 +57,7 @@ module BkWorkers
 
             if company_account.present?
               p credit = company_account['credit'].to_f
+              p debit = company_account['debit'].to_f
 
               credit = credit + credit_rabbit
               if debit - credit < 100
@@ -150,7 +151,7 @@ module BkWorkers
         if tdr_data.present?
           tdr = JSON.parse(tdr_data['tdr'])
           @current_logger.info p "Новый tdr из #{tdr}"
-          p debit_rabbit = tdr["sum"].to_f
+          p debit_rabbit = tdr['sum'].to_f
 
           obd = RedisHelper.on_board_device(tdr['imei'])
           p "obd #{obd}"
@@ -167,6 +168,16 @@ module BkWorkers
           if company_account.present?
             p debit = company_account['debit'].to_f
             debit = debit + debit_rabbit
+            
+            if debit - credit < 100
+              @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['imei']} превышен порог"
+              @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['imei']} ставим флаг 1" 
+              $redis_alarm.set("#{$config['redis_alarm']['db']}:#{tdr['imei']}", 1)
+            else
+              @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['imei']} все нормально"
+              @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['imei']} ставим флаг 0"
+              $redis_alarm.set("#{$config['redis_alarm']['db']}:#{tdr['imei']}", 0)
+            end
 
             company_values = company_account
             company_values['debit'] = debit
