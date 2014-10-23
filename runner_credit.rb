@@ -3,8 +3,8 @@
 
 ## Достаточно запуска только sidekiq
 # Run: export APP_ENV=development && bundle exec sidekiq -C ./config/sidekiq.yml -r ./runner.rb
-# Run: export APP_ENV=production && bundle exec sidekiq -d -C ./config/sidekiq.yml -r ./runner.rb --logfile log/bk_production.log
-# Run: export APP_ENV=production && bundle exec sidekiq -C ./config/sidekiq.yml -r ./runner.rb > /dev/null 2>&1 &
+# Run: export APP_ENV=production && bundle exec sidekiq -d -C ./config/sidekiq.yml -r ./runner_credit.rb --logfile log/bk_production.log
+# Run: export APP_ENV=production && bundle exec sidekiq -C ./config/sidekiq.yml -r ./runner_credit.rb > /dev/null 2>&1 &
 
 
 if ENV['APP_ENV']
@@ -39,7 +39,7 @@ if ENV['APP_ENV']
   instances = 0
   while instances < $config['runner']['instances'].to_i
     BkWorkers::Credit.perform_async(instances)
-    BkWorkers::Debit.perform_async(instances)
+    # BkWorkers::Debit.perform_async(instances)
     instances += 1
   end
 else
