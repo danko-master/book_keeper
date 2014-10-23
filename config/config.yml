@@ -1,7 +1,8 @@
 default: &default
   runner:
     instances: 1
-    input_queue: "svp_billing"
+    input_queue_credit: "svp_billing"
+    input_queue_debit: "svp_payment"
     output_queue: "svp_book_keeper"
 
 default_database: &default_database
@@ -37,6 +38,11 @@ development:
     port: 6379
     db: "svp:alarm"
 
+  redis_cache:
+    host: localhost
+    port: 6379
+    prefix: svp_cache
+
 test:
   <<: *default
 
@@ -69,3 +75,8 @@ production:
     host: 172.17.10.21
     port: 6379
     db: "svp:alarm"
+
+  redis_cache:
+    host: 172.17.10.27
+    port: 6379
+    prefix: svp_cache
