@@ -61,13 +61,13 @@ module BkWorkers
 
               credit = credit + credit_rabbit
               if debit - credit < 100
-                @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['imei']} превышен порог"
-                @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['imei']} ставим флаг 1" 
-                $redis_alarm.set("#{$config['redis_alarm']['db']}:#{tdr['imei']}", 1)
+                @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['company_account_id']} превышен порог"
+                @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['company_account_id']} ставим флаг 1" 
+                $redis_alarm.set("#{$config['redis_alarm']['db']}:#{tdr['company_account_id']}", 1)
               else
-                @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['imei']} все нормально"
-                @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['imei']} ставим флаг 0"
-                $redis_alarm.set("#{$config['redis_alarm']['db']}:#{tdr['imei']}", 0)
+                @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['company_account_id']} все нормально"
+                @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['company_account_id']} ставим флаг 0"
+                $redis_alarm.set("#{$config['redis_alarm']['db']}:#{tdr['company_account_id']}", 0)
               end
 
               company_values = company_account
@@ -171,13 +171,13 @@ module BkWorkers
             debit = debit + debit_rabbit
 
             if debit - credit < 100
-              @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['imei']} превышен порог"
-              @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['imei']} ставим флаг 1" 
-              $redis_alarm.set("#{$config['redis_alarm']['db']}:#{tdr['imei']}", 1)
+              @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['company_account_id']} превышен порог"
+              @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['company_account_id']} ставим флаг 1" 
+              $redis_alarm.set("#{$config['redis_alarm']['db']}:#{tdr['company_account_id']}", 1)
             else
-              @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['imei']} все нормально"
-              @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['imei']} ставим флаг 0"
-              $redis_alarm.set("#{$config['redis_alarm']['db']}:#{tdr['imei']}", 0)
+              @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['company_account_id']} все нормально"
+              @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['company_account_id']} ставим флаг 0"
+              $redis_alarm.set("#{$config['redis_alarm']['db']}:#{tdr['company_account_id']}", 0)
             end
 
             company_values = company_account
