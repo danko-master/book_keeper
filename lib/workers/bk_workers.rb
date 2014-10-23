@@ -101,7 +101,7 @@ module BkWorkers
 
       h = {
         on_board_device_id: tdr['imei'], 
-        sum: sum,
+        sum: tdr['sum'],
         company_account_id: company_account_id,
         kilometers: tdr['path'],
         payment_type: "write_off"
@@ -206,7 +206,7 @@ module BkWorkers
 
       h = {
         on_board_device_id: tdr['imei'], 
-        sum: sum,
+        sum: tdr['sum'],
         company_account_id: company_account_id,
         kilometers: 0,
         payment_type: "refill"
