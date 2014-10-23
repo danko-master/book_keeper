@@ -60,6 +60,7 @@ module BkWorkers
               p debit = company_account['debit'].to_f
 
               credit = credit + credit_rabbit
+              @current_logger.info p "debit - credit #{debit - credit}"
               if debit - credit < 100
                 @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['company_account_id']} превышен порог"
                 @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['company_account_id']} ставим флаг 1" 
@@ -172,7 +173,8 @@ module BkWorkers
             debit = debit + debit_rabbit
 
             company_account_id = company_account['id']
-
+            
+            @current_logger.info p "debit - credit #{debit - credit}"
             if debit - credit < 100
               @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['company_account_id']} превышен порог"
               @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['company_account_id']} ставим флаг 1" 
