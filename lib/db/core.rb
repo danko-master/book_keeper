@@ -1,6 +1,9 @@
 require 'active_record'
 
 module Db
+  class CompanyAccount < ActiveRecord::Base
+  end
+  
   class Company < ActiveRecord::Base
   end
 

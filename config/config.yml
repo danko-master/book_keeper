@@ -61,7 +61,7 @@ production:
     host: 172.17.10.24
     port: 5432
     database: svpdb
-    username: svpdb
+    username: svp
     password: qir29sir
 
     

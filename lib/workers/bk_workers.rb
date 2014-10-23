@@ -249,6 +249,14 @@ module BkWorkers
       p "company_account_id #{company_account_id}"
       p "company_values #{company_values}"
       $redis.set("#{$config['redis_cache']['prefix']}:company_account:#{company_account_id}", company_values)
+      
+
+      # костыль для PG пока не будет готово обработчик
+      # обновляем CompanyAccount
+      p ca = Db::CompanyAccount.find_by_id company_account_id
+      p ca.debit = company_values['debit']
+      p ca.credit = company_values['credit']
+      ca.save
     end
   end
 end
