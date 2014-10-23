@@ -168,7 +168,10 @@ module BkWorkers
 
           if company_account.present?
             p debit = company_account['debit'].to_f
+            p credit = company_account['credit'].to_f
             debit = debit + debit_rabbit
+
+            company_account_id = company_account['id']
 
             if debit - credit < 100
               @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['company_account_id']} превышен порог"
@@ -184,7 +187,7 @@ module BkWorkers
             company_values['debit'] = debit
             RedisHelper.update_company_account(company_account_id, company_values)
 
-            send_tdr_data_to_rabbit(tdr, debit, company_account_id, obd['id'])
+            send_tdr_data_to_rabbit(tdr, debit, company_account_id)
           end
 
           delivery_tag = tdr_data['delivery_tag']
@@ -205,12 +208,12 @@ module BkWorkers
       end
     end
 
-    def send_tdr_data_to_rabbit(tdr, sum, company_account_id, on_board_device_id)
+    def send_tdr_data_to_rabbit(tdr, sum, company_account_id)
       @current_logger.info p "Отправка tdr в RabbitMQ #{tdr} ::: sum: #{sum} ::: company_account_id #{company_account_id}"
       q    = @ch.queue($config['runner']['output_queue'], :durable => true)
 
       h = {
-        on_board_device_id: on_board_device_id, 
+        on_board_device_id: "null", 
         sum: tdr['sum'],
         company_account_id: company_account_id,
         kilometers: 0,
