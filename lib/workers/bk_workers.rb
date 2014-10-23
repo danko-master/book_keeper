@@ -74,7 +74,7 @@ module BkWorkers
               company_values['credit'] = credit
               RedisHelper.update_company_account(company_account_id, company_values)
 
-              send_tdr_data_to_rabbit(tdr, credit, company_account_id)
+              send_tdr_data_to_rabbit(tdr, credit, company_account_id, obd['id'])
             end
 
             delivery_tag = tdr_data['delivery_tag']
@@ -95,12 +95,12 @@ module BkWorkers
       end
     end
 
-    def send_tdr_data_to_rabbit(tdr, sum, company_account_id)
+    def send_tdr_data_to_rabbit(tdr, sum, company_account_id, on_board_device_id)
       @current_logger.info p "Отправка tdr в RabbitMQ #{tdr} ::: sum: #{sum} ::: company_account_id #{company_account_id}"
       q    = @ch.queue($config['runner']['output_queue'], :durable => true)
 
       h = {
-        on_board_device_id: tdr['imei'], 
+        on_board_device_id: on_board_device_id,
         sum: tdr['sum'],
         company_account_id: company_account_id,
         kilometers: tdr['path'],
@@ -183,7 +183,7 @@ module BkWorkers
             company_values['debit'] = debit
             RedisHelper.update_company_account(company_account_id, company_values)
 
-            send_tdr_data_to_rabbit(tdr, debit, company_account_id)
+            send_tdr_data_to_rabbit(tdr, debit, company_account_id, obd['id'])
           end
 
           delivery_tag = tdr_data['delivery_tag']
@@ -200,12 +200,12 @@ module BkWorkers
       end
     end
 
-    def send_tdr_data_to_rabbit(tdr, sum, company_account_id)
+    def send_tdr_data_to_rabbit(tdr, sum, company_account_id, on_board_device_id)
       @current_logger.info p "Отправка tdr в RabbitMQ #{tdr} ::: sum: #{sum} ::: company_account_id #{company_account_id}"
       q    = @ch.queue($config['runner']['output_queue'], :durable => true)
 
       h = {
-        on_board_device_id: tdr['imei'], 
+        on_board_device_id: on_board_device_id, 
         sum: tdr['sum'],
         company_account_id: company_account_id,
         kilometers: 0,
