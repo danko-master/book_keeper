@@ -103,8 +103,8 @@ module BkWorkers
         on_board_device_id: tdr['imei'], 
         sum: sum,
         company_account_id: company_account_id,
-        kilometers: tdr["path"], # 0
-        payment_type: "write_off" # refill
+        kilometers: tdr['path'],
+        payment_type: "write_off"
       }
       tdr_doc = h.to_json
 
@@ -168,7 +168,7 @@ module BkWorkers
           if company_account.present?
             p debit = company_account['debit'].to_f
             debit = debit + debit_rabbit
-            
+
             if debit - credit < 100
               @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['imei']} превышен порог"
               @current_logger.info p "#{$config['redis_alarm']['db']}:#{tdr['imei']} ставим флаг 1" 
