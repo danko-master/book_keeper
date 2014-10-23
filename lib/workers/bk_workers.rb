@@ -85,7 +85,7 @@ module BkWorkers
             @current_logger.info p "Обработан tdr #{tdr}"  
           else
             # Заглушка 
-            @current_logger.info p "Принудительная Отправка ack в RabbitMQ ::: delivery_tag: #{delivery_tag}"
+            @current_logger.info p "Принудительная Отправка ack в RabbitMQ ::: delivery_tag: #{delivery_info.delivery_tag}"
             @ch.ack(delivery_info.delivery_tag)
           end
 
@@ -141,7 +141,7 @@ module BkWorkers
       @current_logger.info p "Выполняем run, ждем tdr. input_queue_debit #{$config['runner']['input_queue_debit']}"  
       q    = @ch.queue($config['runner']['input_queue_debit'], :durable => true) 
       q.subscribe(:block => true, :manual_ack => true) do |delivery_info, properties, body|
-      #begin
+      begin
         tdr_data = Hash.new
         tdr_data['delivery_tag'] = delivery_info.delivery_tag
         tdr_data['tdr'] = body 
@@ -150,7 +150,7 @@ module BkWorkers
 
         if tdr_data.present?
           tdr = JSON.parse(tdr_data['tdr'])
-          @current_logger.info p "Новый tdr из #{tdr}"
+          @current_logger.info p "Новый payment debit из #{tdr}"
           p debit_rabbit = tdr['sum'].to_f
 
           # obd = RedisHelper.on_board_device(tdr['imei'])
@@ -193,11 +193,15 @@ module BkWorkers
           @ch.ack(delivery_tag)
 
           @current_logger.info p "Обработан tdr #{tdr}"  
+        else
+          # Заглушка 
+          @current_logger.info p "Принудительная Отправка ack в RabbitMQ ::: delivery_tag: #{delivery_info.delivery_tag}"
+          @ch.ack(delivery_info.delivery_tag)
         end
 
-      # rescue Exception => e
-      #   puts "ERROR! #{e}"
-      # end
+      rescue Exception => e
+        puts "ERROR! #{e}"
+      end
       end
     end
 
