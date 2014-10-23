@@ -31,7 +31,7 @@ module BkWorkers
       @current_logger.info p "Выполняем run, ждем tdr. input_queue_credit #{$config['runner']['input_queue_credit']}"  
       q    = @ch.queue($config['runner']['input_queue_credit'], :durable => true) 
       q.subscribe(:block => true, :manual_ack => true) do |delivery_info, properties, body|
-        #begin
+        begin
           tdr_data = Hash.new
           tdr_data['delivery_tag'] = delivery_info.delivery_tag
           tdr_data['tdr'] = body 
@@ -82,11 +82,15 @@ module BkWorkers
             @ch.ack(delivery_tag)
 
             @current_logger.info p "Обработан tdr #{tdr}"  
+          else
+            # Заглушка 
+            @current_logger.info p "Принудительная Отправка ack в RabbitMQ ::: delivery_tag: #{delivery_tag}"
+            @ch.ack(delivery_info.delivery_tag)
           end
 
-        # rescue Exception => e
-        #   puts "ERROR! #{e}"
-        # end
+        rescue Exception => e
+          puts "ERROR! #{e}"
+        end
       end
     end
 
