@@ -153,16 +153,17 @@ module BkWorkers
           @current_logger.info p "Новый tdr из #{tdr}"
           p debit_rabbit = tdr['sum'].to_f
 
-          obd = RedisHelper.on_board_device(tdr['imei'])
-          p "obd #{obd}"
+          # obd = RedisHelper.on_board_device(tdr['imei'])
+          # p "obd #{obd}"
 
-          obd_truck = RedisHelper.truck(obd['truck_id']) if obd.present?
-          p "obd_truck #{obd_truck}"
+          # obd_truck = RedisHelper.truck(obd['truck_id']) if obd.present?
+          # p "obd_truck #{obd_truck}"
 
-          if obd_truck.present?
-            company_account_id = obd_truck['company_account_id']
-            p company_account = RedisHelper.company_account(company_account_id) 
-          end
+          # if obd_truck.present?
+          #   company_account_id = obd_truck['company_account_id']
+          #   p company_account = RedisHelper.company_account(company_account_id) 
+          # end
+          p company_account = RedisHelper.company_account(tdr['company_account_id'])
           p "company_account #{company_account}"
 
           if company_account.present?
