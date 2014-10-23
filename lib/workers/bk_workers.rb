@@ -253,7 +253,7 @@ module BkWorkers
 
       # костыль для PG пока не будет готово обработчик
       # обновляем CompanyAccount
-      p ca = Db::CompanyAccount.find_by_id company_account_id
+      p ca = Db::CompanyAccount.find_by_id(company_account_id)
       p ca.debit = company_values['debit']
       p ca.credit = company_values['credit']
       ca.save
