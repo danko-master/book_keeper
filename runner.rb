@@ -31,7 +31,9 @@ if ENV['APP_ENV']
   
   require 'redis'
   $redis = Redis.new(host: $config['redis_cache']['host'], port: $config['redis_cache']['port'])
+  current_logger.info "$redis #{$redis}"
   $redis_alarm = Redis.new(host: $config['redis_alarm']['host'], port: $config['redis_alarm']['port'])
+  current_logger.info "$redis_alarm #{$redis_alarm}"
   
   require 'sidekiq' 
   instances = 0
