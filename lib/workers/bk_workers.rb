@@ -174,7 +174,7 @@ module BkWorkers
             p credit = company_account['credit'].to_f
             debit = debit + debit_rabbit
 
-            company_account_id = company_account['id']
+            company_account_id = tdr['company_account_id']
 
             @current_logger.info p "debit - credit #{debit - credit}"
             if debit - credit < 100
